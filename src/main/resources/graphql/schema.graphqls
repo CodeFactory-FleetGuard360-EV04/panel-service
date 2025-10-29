@@ -1,0 +1,15 @@
+type Query {
+    getAllAlerts: [AlertResponse!]!
+    getAlertById(id: ID!): AlertResponse
+}
+
+type AlertResponse {
+    id: ID!
+    alertType: String!
+    responsible: String!
+    priority: String!
+    driver: String!
+    generatingUnit: String!
+    state: String!
+    generationDate: String!
+}
