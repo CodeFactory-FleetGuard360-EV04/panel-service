@@ -1,10 +1,7 @@
 package com.fleetguard360.panel_service.configuration;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -33,13 +30,13 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public TopicExchange exchange() {
+    public DirectExchange exchange() {
         log.info("Creating exchange: {}", exchangeName);
-        return new TopicExchange(exchangeName);
+        return new DirectExchange(exchangeName);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
+    public Binding binding(Queue queue, DirectExchange exchange) {
         log.info("Binding queue {} to exchange {} with routing key {}", queueName, exchangeName, routingKey);
         return BindingBuilder
                 .bind(queue)
