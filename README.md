@@ -204,6 +204,60 @@ LOG_LEVEL=DEBUG
 APP_LOG_LEVEL=TRACE
 ```
 
+Claro, aquí tienes una **guía concisa en Markdown**, lista para incluir en tu `README.md`, que explica cómo debe implementarse la descarga del archivo CSV desde el frontend, considerando tu arquitectura (GraphQL → Gateway → REST CSV):
+
+---
+
+## 📥 Descarga de Archivos CSV desde el Frontend
+
+El microservicio `panel-service` genera archivos `.csv` mediante un endpoint REST protegido. Para descargarlos correctamente desde el frontend, sigue estos pasos:
+
+### 1. Obtén la URL de descarga mediante GraphQL (Api Gateway)
+
+```graphql
+query {
+  exportAlertsCsvUrl  # devuelve una URL efímera, ej: "/panel/export/alerts.csv?token=abc123"
+}
+```
+
+### 2. Descarga el archivo con `fetch()` (¡no uses `<a href>`!)
+
+```javascript
+const downloadCsv = async () => {
+  // 1. Obtén la URL
+  const { data } = await client.query({ query: EXPORT_CSV_QUERY });
+  const url = data.exportAlertsCsvUrl;
+
+  // 2. Descarga con autenticación
+  const token = getAuthToken(); // tu método para obtener el JWT
+  const response = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) throw new Error('Descarga fallida');
+
+  // 3. Crea y dispara la descarga
+  const blob = await response.blob();
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'alerts.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+```
+
+
+### ✅ ¿Por qué este enfoque?
+
+- ✔️ El header `Authorization` se incluye (requerido por el `AuthenticationFilter` del gateway).
+- ✔️ Soporta archivos grandes sin bloquear la UI.
+- ✔️ Funciona en navegadores modernos (Chrome, Firefox, Edge, Safari).
+- ✔️ Evita descargar errores HTML (ej: redirección a login).
+
+Primeros datos generados del archivo .csv:
+
+![alert csv](docs/images/alert_csv.png)
+
 ## 🐛 Solución de Problemas
 
 ### La aplicación no conecta a PostgreSQL

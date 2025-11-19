@@ -1,6 +1,7 @@
 type Query {
     getAllAlerts: [AlertResponse!]!
     getAlertById(id: ID!): AlertResponse
+    exportAlertsCsvUrl: String!
 }
 
 type AlertResponse {
